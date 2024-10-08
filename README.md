@@ -1,6 +1,6 @@
 Dot Game
 ```bash
-git clone https://github.com/dweisberg3/dot-game.git
+git clone https://github.com/MichoelR/Dot-Game.git
 
 cd dot-game
 
