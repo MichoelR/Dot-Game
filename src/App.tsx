@@ -19,7 +19,16 @@ const colorOptions = [
 	},
   ];
 
-const CustomRadioButton = ({ label, value, selectedValue, onChange, color, gradient }) => (
+type CustomRadioButtonProps = {
+  label: string;
+  value: string;
+  selectedValue: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  color: string;
+  gradient?: string;
+};
+
+const CustomRadioButton: React.FC<CustomRadioButtonProps>  = ({ label, value, selectedValue, onChange, color, gradient }) => (
   <Box className="radio-button-container">
     <label className="radio-button-label">
       <input
@@ -65,8 +74,15 @@ const CustomRadioButton = ({ label, value, selectedValue, onChange, color, gradi
   </Box>
 );
 
+type ButtonGridProps = {
+  buttons: string[];
+  clickedButton: string | number;
+  handleButtonClick: (value: string | number) => void;
+  buttonsDisabled: boolean;
+};
+
 // Reusable ButtonGrid Component
-const ButtonGrid = ({ buttons, clickedButton, handleButtonClick, buttonsDisabled }) => (
+const ButtonGrid: React.FC<ButtonGridProps>  = ({ buttons, clickedButton, handleButtonClick, buttonsDisabled }) => (
   <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
 	{buttons.length > 0 ? (
 	  buttons.map((buttonValue) => (
@@ -97,17 +113,28 @@ const ButtonGrid = ({ buttons, clickedButton, handleButtonClick, buttonsDisabled
 );
 
 const DotGuessingGame: React.FC = () => {
+
+type Dot = {
+  x?: number; // existing property (you might already have this)
+  y?: number; // existing property (you might already have this)
+  size?: number; // assuming size is used somewhere in your code
+  color?: string; // assuming you have a color for dots
+  shape?: 'circle' | 'square'; // shape can be 'circle' or 'square'
+  top?: string; // CSS position value like '50%'
+  left?: string; // CSS position value like '50%'
+};
+
   const [dots, setDots] = useState<Dot[]>([]);
   const [numDots, setNumDots] = useState<number>(0);
   const [guess, setGuess] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState<number>(7);
-  const [shapeType, setShapeType] = useState<string>("both"); // Default to "both"
+  const [shapeType, setShapeType] = useState<string>("dots"); // Default
   const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
   const [minDots, setMinDots] = useState<number>(4); // Initial value for MIN
   const [maxDots, setMaxDots] = useState<number>(10); // Initial value for MAX
   const [dotSize, setDotSize] = useState<number>(50); // Initial size for dots
-  const [colorType, setColorType] = useState<string>("many"); // Default to "many"
+  const [colorType, setColorType] = useState<string>("blue"); // Default
   const [correctCount, setCorrectCount] = useState<number>(0);
   const [incorrectCount, setIncorrectCount] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -150,6 +177,39 @@ const DotGuessingGame: React.FC = () => {
 	  }
 	}, [timeLeft, isGameRunning, initialTimeLimit, buttonsDisabled]);
 
+	useEffect(() => {
+	  // Update dot shapes immediately when `shapeType` changes
+	  setDots((prevDots) =>
+		prevDots.map((dot) => ({
+		  ...dot,
+		  shape:
+			shapeType === "dots"
+			  ? "circle"
+			  : shapeType === "squares"
+			  ? "square"
+			  : Math.random() < 0.5
+			  ? "circle"
+			  : "square", // Random if 'both'
+		}))
+	  );
+	}, [shapeType]);
+
+	useEffect(() => {
+	  // Update dot colors immediately when `colorType` changes
+	  setDots((prevDots) =>
+		prevDots.map((dot) => ({
+		  ...dot,
+		  color:
+			colorType === "red"
+			  ? "red"
+			  : colorType === "blue"
+			  ? "blue"
+			  : colorType === "black"
+			  ? "black"
+			  : getRandomColor(), // Random if 'many'
+		}))
+	  );
+	}, [colorType]);
 
 
 const startGame = () => { // reset _next set_
@@ -200,13 +260,12 @@ const startGame = () => { // reset _next set_
   
   // Clear button focus
     let buttons = document.querySelectorAll('.MuiButton-root');
-    buttons.forEach(button => {
+    buttons.forEach((button: HTMLButtonElement) => {
       button.blur(); // Remove focus outline
     });
 
   // Generate all possible ranges of N numbers containing the correct answer
   for (let start = Math.max(minDots, randomNumDots - maxButtons + 1); start <= randomNumDots; start++) {
-    const end = start + maxButtons - 1;
     possibleRanges.push(Array.from({ length: maxButtons }, (_, i) => start + i));
   }
   // Randomly pick one of the valid ranges
@@ -306,7 +365,7 @@ const startGame = () => { // reset _next set_
               value={shape.value}
               selectedValue={shapeType}
               onChange={() => setShapeType(shape.value)}
-              color="black"
+              color="blue"
             />
           ))}
         </Box>
@@ -328,21 +387,22 @@ const startGame = () => { // reset _next set_
 
         {/* Dot Size Slider */}
         <Box sx={{ width: "100%", textAlign: "center", marginBottom: "30px" }}>
-          <Typography clas="slider-text" sx={{ fontWeight: "bold", fontSize: "30px"}}>
+		  <Typography className="slider-text" component="span" sx={{ fontWeight: "bold", fontSize: "30px"}}>
+
 		    Dot Size: {dotSize}px
 		  </Typography>
           <Slider value={dotSize} min={10} max={150} step={1}
-		    onChange={(e, newValue) => setDotSize(newValue as number)}
+		    onChange={(_,newValue) => setDotSize(newValue as unknown as number)}
 		    sx={{ width: "100%" }} />
         </Box>
 
         {/* Time Limit Slider */}
         <Box sx={{ width: "100%", textAlign: "center", marginBottom: "30px" }}>
-          <Typography clas="slider-text" sx={{ fontWeight: "bold", fontSize: "30px"}}>
+          <Typography className="slider-text" sx={{ fontWeight: "bold", fontSize: "30px"}}>
 		    Time Limit: {initialTimeLimit} seconds
 	      </Typography>
           <Slider value={initialTimeLimit} min={1} max={15} step={1}
-		    onChange={(e, newValue) => setInitialTimeLimit(newValue as number)}
+		    onChange={(_,newValue) => setInitialTimeLimit(newValue as unknown as number)}
 		    sx={{ width: "100%", color: "secondary.main" }} />
         </Box>
 
@@ -493,7 +553,12 @@ const startGame = () => { // reset _next set_
           variant="outlined"
           value={guess}
           onChange={(e) => setGuess(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && checkGuess(e.target.value)}
+          onKeyPress={(e) => {
+		    const target = e.target as HTMLInputElement;
+		    if (e.key === "Enter") {
+			  checkGuess(target.value)
+			}
+		  }}
           sx={{ width: "220px" }}
 		  InputLabelProps={{
 			sx: { fontSize: "30px", fontWeight: "bold" }, // Adjust label size and weight
@@ -505,7 +570,7 @@ const startGame = () => { // reset _next set_
         />
 		
         <ButtonGrid 
-		  buttons={guessButtons}
+		  buttons={guessButtons.map((button) => button.toString())}
 		  clickedButton={clickedButton}
 		  handleButtonClick={handleButtonClick}
 		  buttonsDisabled={buttonsDisabled}

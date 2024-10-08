@@ -74,8 +74,8 @@
 }
 
 .radio-button-dot-inner {
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background-color: white;
   position: absolute;
@@ -99,17 +99,17 @@
 
 .slider {
 	width: "100px";
-	textAlign: "center";
-	marginBottom: "30px";
+	text-align: "center";
+	margin-bottom: "30px";
 }
 
 .slider-text {
-	marginBottom: "5px";
+	margin-bottom: "5px";
 }
 
 .input-minmax {
 	display: "flex";
-	justifyContent: "space-between";
+	justify-content: "space-between";
 	width: "100%";
 }
 
@@ -142,7 +142,7 @@
 /* Result message and counters */
 .result-message-container {
 	display: "flex";
-	alignItems: "center";
+	align-items: "center";
 	position: "absolute";
 	bottom: "20px";
 	left: "50%";
