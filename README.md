@@ -8,3 +8,8 @@ npm install
 
 npm run dev
 ```
+
+The game can be viewed here directly at  
+https://michoelr.github.io/Dot-Game/
+
+
