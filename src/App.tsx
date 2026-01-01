@@ -248,6 +248,7 @@ const DotGuessingGame: React.FC = () => {
   const [dotSize, setDotSize] = useState<number>(75); // Initial size for dots
   const [colorType, setColorType] = useState<string>("blue"); // Default
   const inputRef = useRef<HTMLInputElement>(null);
+  const intervalRef = useRef<number | null>(null);
   const [guessButtons, setGuessButtons] = useState<number[]>([]);
   const [clickedButton, setClickedButton] = useState<number | null>(null); // Track the clicked button
   const [buttonsDisabled, setButtonsDisabled] = useState<boolean>(false); // New state to disable buttons
@@ -347,7 +348,7 @@ const DotGuessingGame: React.FC = () => {
       }
     }
     if (isGameRunning && !isPaused) {
-      const interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         setDots((prevDots) => {
           return prevDots.map((dot) => {
             if (!dot.vxSign || !dot.vySign || !dot.r) {
@@ -414,8 +415,19 @@ const DotGuessingGame: React.FC = () => {
   // }
         }, 50); // Update every 50ms for smooth animation
 
-      return () => clearInterval(interval);
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
     }
+  } else {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }
   }, [timeLeft, isGameRunning, buttonsDisabled, isPaused]);
 
   const resetMinMax = (level) => {
