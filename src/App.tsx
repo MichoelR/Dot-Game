@@ -589,6 +589,7 @@ const DotGuessingGame: React.FC = () => {
 
     // Only start next game if not leveling up
     if (!levelUpHappened) {
+      setIsGameRunning(false); // Stop the current game
       setTimeout(() => {
         startOneGame(); // Start the next game
       }, 250);
