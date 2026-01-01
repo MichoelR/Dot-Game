@@ -12,7 +12,7 @@ import {
 import "./App.css"; // Import the App.css file
 
 let playerState = {
-  currentLevel: 1,
+  currentLevel: 3,
   score: 0, // overall score correct for all rounds
   totalScore: 0, // overall total Score
   correctCount: 0, // for this round
@@ -55,7 +55,7 @@ const CustomRadioButton: React.FC<CustomRadioButtonProps> = ({
   gradient,
 }) => (
   <Box className="radio-button-container">
-    <label className="radio-button-label">
+    <label className="radio-button-label" style={{ position: "relative" }}>
       <input
         type="radio"
         value={value}
@@ -82,19 +82,80 @@ const CustomRadioButton: React.FC<CustomRadioButtonProps> = ({
             value === "both" ? "0%" : value === "squares" ? "0%" : "50%", // Square for "Both"
         }}
       >
-        {selectedValue === value && <span className="radio-button-dot-inner" />}
+        {selectedValue === value && value !== "both" && (
+          <>
+            <span className="radio-button-dot-inner" />
+            {value === "squares" && (
+              <span
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  borderRadius: "0%",
+                  backgroundColor: "white",
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                }}
+              />
+            )}
+          </>
+        )}
         {value === "both" && (
-          <span
-            style={{
-              position: "absolute",
-              top: "-10px",
-              left: "-10px",
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              backgroundColor: color,
-            }}
-          />
+          <>
+            <span
+              style={{
+                position: "absolute",
+                top: "-10px",
+                left: "-10px",
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                backgroundColor: color,
+              }}
+            >
+              {selectedValue === value && (
+                <span
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    borderRadius: "50%",
+                    backgroundColor: "white",
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                />
+              )}
+            </span>
+            <span
+              style={{
+                position: "absolute",
+                top: "0px",
+                left: "0px",
+                width: "16px",
+                height: "16px",
+                borderRadius: "0%",
+                border: `2px solid black`,
+                backgroundColor: "transparent",
+              }}
+            />
+            {selectedValue === value && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "0%",
+                  backgroundColor: "black",
+                }}
+              />
+            )}
+          </>
         )}
       </span>
       <span
@@ -168,12 +229,14 @@ const LevelUpDialog: React.FC<{
   onChooseMoreDots: () => void;
   onChooseLessTime: () => void;
   onChooseFasterDrifting: () => void;
+  canFasterDrift: boolean;
 }> = ({
   open,
   onClose,
   onChooseMoreDots,
   onChooseLessTime,
   onChooseFasterDrifting,
+  canFasterDrift,
 }) => {
   return (
     <Dialog open={open} onClose={onClose}>
@@ -207,12 +270,76 @@ const LevelUpDialog: React.FC<{
         <Button
           variant="contained"
           color="success"
+          disabled={!canFasterDrift}
           onClick={() => {
             onChooseFasterDrifting();
             onClose();
           }}
         >
           FASTER DRIFTING
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const LevelDownDialog: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  onChooseDownLevel: () => void;
+  onChooseMoreTime: () => void;
+  onChooseSlowerDrifting: () => void;
+  canDownLevel: boolean;
+  canSlowerDrift: boolean;
+}> = ({
+  open,
+  onClose,
+  onChooseDownLevel,
+  onChooseMoreTime,
+  onChooseSlowerDrifting,
+  canDownLevel,
+  canSlowerDrift,
+}) => {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Adjust Difficulty</DialogTitle>
+      <DialogContent>
+        <Typography variant="body1" gutterBottom>
+          Choose your challenge: Down a level, more time, or slower drifting?
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={!canDownLevel}
+          onClick={() => {
+            onChooseDownLevel();
+            onClose();
+          }}
+        >
+          DOWN A LEVEL
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => {
+            onChooseMoreTime();
+            onClose();
+          }}
+        >
+          MORE TIME
+        </Button>
+        <Button
+          variant="contained"
+          color="success"
+          disabled={!canSlowerDrift}
+          onClick={() => {
+            onChooseSlowerDrifting();
+            onClose();
+          }}
+        >
+          SLOWER DRIFTING
         </Button>
       </DialogActions>
     </Dialog>
@@ -249,6 +376,8 @@ const DotGuessingGame: React.FC = () => {
   const [clickedButton, setClickedButton] = useState<number | null>(null); // Track the clicked button
   const [buttonsDisabled, setButtonsDisabled] = useState<boolean>(false); // New state to disable buttons
   const [isLevelUpDialogOpen, setIsLevelUpDialogOpen] =
+    useState<boolean>(false);
+  const [isLevelDownDialogOpen, setIsLevelDownDialogOpen] =
     useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [driftSpeed, setDriftSpeed] = useState<number>(0);
@@ -560,11 +689,7 @@ const DotGuessingGame: React.FC = () => {
   }
 
   function demoteLevel() {
-    if (playerState.currentLevel > 0) {
-      playerState.currentLevel--;
-      showLevelDownPopup();
-      resetMinMax(playerState.currentLevel);
-    }
+    showLevelDownPopup();
   }
 
   function showLevelUpPopup() {
@@ -573,11 +698,8 @@ const DotGuessingGame: React.FC = () => {
   }
 
   function showLevelDownPopup() {
-    alert(
-      `Let's try an easier level for a bit. You are now on Level ` +
-        playerState.currentLevel +
-        `. Keep going!`,
-    );
+    setIsPaused(true); // Pause the game while dialog is open
+    setIsLevelDownDialogOpen(true);
   }
 
   // Handle user choice
@@ -605,12 +727,46 @@ const DotGuessingGame: React.FC = () => {
     startOneGame(); // Start the next game with new time limit
   };
 
+  const handleChooseMoreTime = () => {
+    // Implement logic for "More Time" choice
+    console.log("User chose More Time");
+    playerState.initialTimeLimit++; // Increase time limit
+    setIsPaused(false); // Resume the game after choice
+    startOneGame(); // Start the next game with new time limit
+  };
+
+  const handleChooseDownLevel = () => {
+    // Implement logic for "Down a Level" choice
+    console.log("User chose Down a Level");
+    if (playerState.currentLevel > 0) {
+      playerState.currentLevel--;
+      resetMinMax(playerState.currentLevel);
+    }
+    setIsPaused(false); // Resume the game after choice
+    startOneGame(); // Start the next game with new level
+  };
+
   const handleChooseFasterDrifting = () => {
     // Implement logic for "Faster Drifting" choice
     console.log("User chose Faster Drifting");
     setDriftSpeed(Math.min(driftSpeed + 0.5, 4.0)); // Increase speed by 0.5, cap at 4.0
     setIsPaused(false); // Resume the game after choice
     startOneGame(); // Start the next game with faster drifting
+  };
+
+  const handleChooseSlowerDrifting = () => {
+    // Implement logic for "Slower Drifting" choice
+    console.log("User chose Slower Drifting");
+    setDriftSpeed(Math.max(driftSpeed - 0.5, 0.0)); // Decrease speed by 0.5, floor at 0.0
+    setIsPaused(false); // Resume the game after choice
+    startOneGame(); // Start the next game with slower drifting
+  };
+
+  const handleKeepGoing = () => {
+    // Just resume without changes
+    console.log("User chose Keep Going");
+    setIsPaused(false);
+    startOneGame();
   };
 
 
@@ -818,7 +974,20 @@ const DotGuessingGame: React.FC = () => {
             max={4.0}
             step={0.1}
             onChange={(_, newValue) => setDriftSpeed(newValue as number)}
-            sx={{ width: "80%" }}
+            sx={{
+              width: "80%",
+              height: "24px",
+              "& .MuiSlider-track": {
+                height: "8px",
+              },
+              "& .MuiSlider-rail": {
+                height: "8px",
+              },
+              "& .MuiSlider-thumb": {
+                width: "24px",
+                height: "24px",
+              },
+            }}
           />
         </Box>
       </Box>
@@ -866,10 +1035,30 @@ const DotGuessingGame: React.FC = () => {
       {/* Difficulty choice dialog */}
       <LevelUpDialog
         open={isLevelUpDialogOpen}
-        onClose={() => setIsLevelUpDialogOpen(false)}
+        onClose={() => {
+          setIsLevelUpDialogOpen(false);
+          setIsPaused(false);
+          startOneGame();
+        }}
         onChooseMoreDots={handleChooseMoreDots}
         onChooseLessTime={handleChooseLessTime}
         onChooseFasterDrifting={handleChooseFasterDrifting}
+        canFasterDrift={driftSpeed < 4.0}
+      />
+
+      {/* Difficulty adjustment dialog */}
+      <LevelDownDialog
+        open={isLevelDownDialogOpen}
+        onClose={() => {
+          setIsLevelDownDialogOpen(false);
+          setIsPaused(false);
+          startOneGame();
+        }}
+        onChooseDownLevel={handleChooseDownLevel}
+        onChooseMoreTime={handleChooseMoreTime}
+        onChooseSlowerDrifting={handleChooseSlowerDrifting}
+        canDownLevel={playerState.currentLevel > 1}
+        canSlowerDrift={driftSpeed > 0.0}
       />
 
       {/* Main Box for Dots */}
@@ -891,7 +1080,7 @@ const DotGuessingGame: React.FC = () => {
               height: dotSize,
               borderRadius: dot.shape === "circle" ? "50%" : "0%",
               backgroundColor: dot.color || "red",
-              border: "2px solid black",
+              border: "2px solid white",
               position: "absolute",
               top: dot.top,
               left: dot.left,
