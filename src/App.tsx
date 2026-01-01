@@ -762,12 +762,6 @@ const DotGuessingGame: React.FC = () => {
     startOneGame(); // Start the next game with slower drifting
   };
 
-  const handleKeepGoing = () => {
-    // Just resume without changes
-    console.log("User chose Keep Going");
-    setIsPaused(false);
-    startOneGame();
-  };
 
 
 
