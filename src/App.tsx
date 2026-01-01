@@ -69,7 +69,7 @@ const CustomRadioButton: React.FC<CustomRadioButtonProps> = ({
           selectedValue === value
             ? "radio-button-selected"
             : "radio-button-unselected"
-        }`}
+            }`}
         style={{
           background: gradient || undefined,
           backgroundColor:
@@ -254,7 +254,7 @@ const DotGuessingGame: React.FC = () => {
   const [isLevelUpDialogOpen, setIsLevelUpDialogOpen] =
     useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [driftSpeed, setDriftSpeed] = useState<number>(0);
+  const [driftSpeed, setDriftSpeed] = useState<number>(1.0);
 
   useEffect(() => {
     // restart game
@@ -346,41 +346,42 @@ const DotGuessingGame: React.FC = () => {
         }, 250);
       }
     }
-    /* if (!isPaused) {
+    if (!isPaused) {
       const interval = setInterval(() => {
         setDots((prevDots) =>
           prevDots.map((dot) => {
-        if (!dot.vxSign || !dot.vySign || !dot.r) {
-          return dot;
-        }
+            if (!dot.vxSign || !dot.vySign || !dot.r) {
+              return dot;
+            }
 
-        let vxSign = dot.vxSign;
-        let vySign = dot.vySign;
+            let vxSign = dot.vxSign;
+            let vySign = dot.vySign;
 
-        let deltaX = vxSign * driftSpeed * dot.r;
-        let deltaY = vySign * driftSpeed * dot.r;
+            let deltaX = vxSign * driftSpeed * dot.r;
+            let deltaY = vySign * driftSpeed * dot.r;
 
-        let newTop = parseFloat(dot.top || "0") + deltaY;
-        let newLeft = parseFloat(dot.left || "0") + deltaX;
+            let newTop = parseFloat(dot.top || "0") + deltaY;
+            let newLeft = parseFloat(dot.left || "0") + deltaX;
 
-  //         // Bounce off edges (top 0-90%, left 0-95% to avoid border)
-        if (newTop <= 0 || newTop >= 90) {
-          vySign = -vySign;
-          newTop = Math.max(0, Math.min(90, newTop));
-        }
-        if (newLeft <= 0 || newLeft >= 94) {
-          vxSign = -vxSign;
-          newLeft = Math.max(0, Math.min(94, newLeft));
-        }
+            //         // Bounce off edges (top 0-90%, left 0-95% to avoid border)
+            if (newTop <= 0 || newTop >= 90) {
+              vySign = -vySign;
+              newTop = Math.max(0, Math.min(90, newTop));
+            }
+            if (newLeft <= 0 || newLeft >= 94) {
+              vxSign = -vxSign;
+              newLeft = Math.max(0, Math.min(94, newLeft));
+            }
 
-        return {
-          ...dot,
-          vxSign,
-          vySign,
-          top: newTop + "%",
-          left: newLeft + "%",
-        }
-      });
+            return {
+              ...dot,
+              vxSign,
+              vySign,
+              top: newTop + "%",
+              left: newLeft + "%"
+            }
+          });
+        );
   //     // Check for collisions between dots
   // if (bouncingEnabled) {
   //   for (let i = 0; i < updatedDots.length; i++) {
@@ -408,8 +409,8 @@ const DotGuessingGame: React.FC = () => {
   // }
         }, 50); // Update every 50ms for smooth animation
 
-    return () => clearInterval(interval);
-    } */
+      return () => clearInterval(interval);
+    }
   }, [timeLeft, isGameRunning, buttonsDisabled, isPaused]);
 
   const resetMinMax = (level) => {
