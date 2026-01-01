@@ -275,7 +275,7 @@ const DotGuessingGame: React.FC = () => {
 
   useEffect(() => {
     // timer
-    if (isGameRunning && !isPaused) {
+    if (isGameRunning) {
       if (timeLeft > 0 && !buttonsDisabled) {
         const timer = setTimeout(() => {
           setTimeLeft(timeLeft - 1); // Decrement time left every second
@@ -353,7 +353,8 @@ const DotGuessingGame: React.FC = () => {
         }, 250);
       }
     }
-    if (isGameRunning && !isPaused) {
+    if (isGameRunning) {
+      console.log('setting interval');
       intervalRef.current = setInterval(() => {
         setDots((prevDots) => {
             console.log('setDots called');
