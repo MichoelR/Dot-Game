@@ -346,10 +346,10 @@ const DotGuessingGame: React.FC = () => {
         }, 250);
       }
     }
-    if (!isPaused) {
+    if (isGameRunning && !isPaused) {
       const interval = setInterval(() => {
-        setDots((prevDots) =>
-          prevDots.map((dot) => {
+        setDots((prevDots) => {
+          return prevDots.map((dot) => {
             if (!dot.vxSign || !dot.vySign || !dot.r) {
               return dot;
             }
@@ -374,14 +374,19 @@ const DotGuessingGame: React.FC = () => {
             }
 
             return {
-              ...dot,
+              x: dot.x,
+              y: dot.y,
+              size: dot.size,
+              color: dot.color,
+              shape: dot.shape,
+              top: newTop + "%",
+              left: newLeft + "%",
               vxSign,
               vySign,
-              top: newTop + "%",
-              left: newLeft + "%"
+              r: dot.r
             }
           });
-        );
+        });
   //     // Check for collisions between dots
   // if (bouncingEnabled) {
   //   for (let i = 0; i < updatedDots.length; i++) {
