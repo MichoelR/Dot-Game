@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Typography,
-  TextField,
   Slider,
   Dialog,
   DialogTitle,
@@ -222,9 +221,6 @@ const LevelUpDialog: React.FC<{
 
 const DotGuessingGame: React.FC = () => {
   type Dot = {
-    x?: number; // existing property (you might already have this)
-    y?: number; // existing property (you might already have this)
-    size?: number; // assuming size is used somewhere in your code
     color?: string; // assuming you have a color for dots
     shape?: "circle" | "square"; // shape can be 'circle' or 'square'
     top?: string; // CSS position value like '50%'
@@ -236,13 +232,13 @@ const DotGuessingGame: React.FC = () => {
 
   const [dots, setDots] = useState<Dot[]>([]);
   const [numDots, setNumDots] = useState<number>(0);
-  const [guess, setGuess] = useState<string>("");
+
   const [message, setMessage] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState<number>(7);
   const [shapeType, setShapeType] = useState<string>("dots"); // Default
   const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
-  const [totalScore, setTotalScore] = useState<number>(0);
-  const [showLevelUp, setShowLevelUp] = useState<boolean>(false); // Level-up notification
+
+
   const [minDots, setMinDots] = useState<number>(1); // Initial value for MIN
   const [maxDots, setMaxDots] = useState<number>(4); // Initial value for MAX
   const [dotSize, setDotSize] = useState<number>(75); // Initial size for dots
@@ -273,7 +269,7 @@ const DotGuessingGame: React.FC = () => {
 
   useEffect(() => {
     // timer
-    let timer;
+    let timer: number | undefined;
     if (isGameRunning && !isPaused) {
       if (timeLeft > 0 && !buttonsDisabled) {
         timer = setTimeout(() => {
@@ -332,7 +328,7 @@ const DotGuessingGame: React.FC = () => {
   }, [colorType]);
 
     useEffect(() => {
-          let timer;
+          let timer: number | undefined;
           if (isGameRunning && !isPaused) {
             if (timeLeft > 0 && !buttonsDisabled) {
               timer = setTimeout(() => {
@@ -395,7 +391,7 @@ const DotGuessingGame: React.FC = () => {
 
 
 
-  const resetMinMax = (level) => {
+  const resetMinMax = (level: number) => {
     // just setting initial values after moving a level
     const min = level;
     const max = level > 3 ? 2 * level : level + 4; // expand range gradually till 8 choices
@@ -455,7 +451,6 @@ const DotGuessingGame: React.FC = () => {
     setTimeLeft(playerState.initialTimeLimit);
     setIsGameRunning(true);
     setMessage("");
-    setGuess("");
     setClickedButton(null); // Reset clicked button state here
 
     // Generate guess buttons
@@ -497,7 +492,6 @@ const DotGuessingGame: React.FC = () => {
 
   const handleButtonClick = (value: number) => {
     const newGuess = value.toString(); // Set the guess based on button clicked
-    setGuess(newGuess); // Update the guess state
     setClickedButton(value); // Store which button was clicked
 
     // Disable buttons and stop the timer immediately
@@ -619,14 +613,7 @@ const DotGuessingGame: React.FC = () => {
     startOneGame(); // Start the next game with faster drifting
   };
 
-  const handleEndGame = () => {
-    setIsGameRunning(false); // Stop the game
-    setTimeLeft(playerState.initialTimeLimit); // Reset the timer
-    setButtonsDisabled(true); // disable guess buttons
-    setMessage("Game Over!"); // Show game over message
-    setDots([]); // Clear the dots
-    setGuessButtons([]); // Clear the guess buttons
-  };
+
 
   const handleStartGame = () => {
     setIsPaused(false);
@@ -717,7 +704,7 @@ const DotGuessingGame: React.FC = () => {
             max={15}
             step={1}
             onChange={(_, newValue) =>
-              (playerState.initialTimeLimit = newValue)
+              (playerState.initialTimeLimit = newValue as number)
             }
             sx={{ width: "100%", color: "secondary.main" }}
           />
@@ -874,27 +861,7 @@ const DotGuessingGame: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* Display Level-Up Popup */}
-      {showLevelUp && (
-        <Box
-          className="level-up-popup"
-          sx={{
-            position: "absolute",
-            top: "20%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            padding: "20px",
-            backgroundColor: "#ffeb3b",
-            borderRadius: "10px",
-            zIndex: 10,
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            fontSize: "24px",
-            fontWeight: "bold",
-          }}
-        >
-          Level Up! Now on Level {playerState.currentLevel}
-        </Box>
-      )}
+
 
       {/* Difficulty choice dialog */}
       <LevelUpDialog
