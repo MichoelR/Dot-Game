@@ -8,3 +8,7 @@ npm install
 
 npm run dev
 ```
+
+Now runs online https://michoelr.github.io/Dot-Game/
+
+<!-- Trigger build -->
