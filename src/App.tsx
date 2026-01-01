@@ -355,9 +355,7 @@ const DotGuessingGame: React.FC = () => {
     }
     if (isGameRunning && !isPaused) {
       intervalRef.current = setInterval(() => {
-        setInterval(() => {
-          console.log('interval running');
-          setDots((prevDots) => {
+        setDots((prevDots) => {
             return prevDots.map((dot) => {
             if (!dot.vxSign || !dot.vySign || !dot.r) {
               return dot;
