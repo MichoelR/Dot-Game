@@ -9,6 +9,6 @@ npm install
 npm run dev
 ```
 
-Now runs online https://michoelr.github.io/Dot-Game/
+Now runs online https://michoelr.github.io/Dot-Game/ in github.com/MichoelR/Dot-Game/
 
 <!-- Trigger build -->
