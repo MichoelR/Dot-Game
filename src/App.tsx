@@ -258,6 +258,11 @@ const DotGuessingGame: React.FC = () => {
   const [driftSpeed, setDriftSpeed] = useState<number>(1.0);
 
   useEffect(() => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     // restart game
     if (isGameRunning) {
       // Focus the input field when the game starts
@@ -450,7 +455,7 @@ const DotGuessingGame: React.FC = () => {
         shape = "circle"; // Only generate circles
       } else if (shapeType === "squares") {
         shape = "square"; // Only generate squares
-      } else {
+         else {
         // Randomly assign shape if "both" is selected
         shape = Math.random() < 0.5 ? "circle" : "square";
       }
@@ -462,7 +467,7 @@ const DotGuessingGame: React.FC = () => {
         color = "blue"; // Only generate blue dots
       } else if (colorType === "black") {
         color = "black"; // Only generate black dots
-      } else {
+       else {
         color = getRandomColor(); // Assign random color for "many"
       }
 
