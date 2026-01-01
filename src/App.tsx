@@ -258,7 +258,6 @@ const DotGuessingGame: React.FC = () => {
   const [driftSpeed, setDriftSpeed] = useState<number>(4.0);
 
   useEffect(() => {
-    console.log('useEffect running', { isGameRunning, isPaused });
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -354,10 +353,8 @@ const DotGuessingGame: React.FC = () => {
       }
     }
     if (isGameRunning) {
-      console.log('setting interval');
       intervalRef.current = setInterval(() => {
         setDots((prevDots) => {
-            console.log('setDots called');
             return prevDots.map((dot) => {
             if (!dot.vxSign || !dot.vySign || !dot.r) {
               return dot;
@@ -382,7 +379,6 @@ const DotGuessingGame: React.FC = () => {
               newLeft = Math.max(0, Math.min(94, newLeft));
             }
 
-            console.log('updating dot', dot.top, 'to', newTop + "%");
             return {
               x: dot.x,
               y: dot.y,
