@@ -356,6 +356,7 @@ const DotGuessingGame: React.FC = () => {
     if (isGameRunning && !isPaused) {
       intervalRef.current = setInterval(() => {
         setDots((prevDots) => {
+            console.log('setDots called');
             return prevDots.map((dot) => {
             if (!dot.vxSign || !dot.vySign || !dot.r) {
               return dot;
@@ -380,6 +381,7 @@ const DotGuessingGame: React.FC = () => {
               newLeft = Math.max(0, Math.min(94, newLeft));
             }
 
+            console.log('updating dot', dot.top, 'to', newTop + "%");
             return {
               x: dot.x,
               y: dot.y,
