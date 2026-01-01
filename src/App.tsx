@@ -255,7 +255,7 @@ const DotGuessingGame: React.FC = () => {
   const [isLevelUpDialogOpen, setIsLevelUpDialogOpen] =
     useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [driftSpeed, setDriftSpeed] = useState<number>(1.0);
+  const [driftSpeed, setDriftSpeed] = useState<number>(2.0);
 
   useEffect(() => {
     // Clear any existing interval
