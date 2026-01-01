@@ -439,6 +439,11 @@ const DotGuessingGame: React.FC = () => {
   };
 
   const startOneGame = () => {
+    // Clear any existing drifting interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     // reset and start _next set_
 
     const randomNumDots =
