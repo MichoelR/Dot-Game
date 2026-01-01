@@ -258,6 +258,7 @@ const DotGuessingGame: React.FC = () => {
   const [driftSpeed, setDriftSpeed] = useState<number>(4.0);
 
   useEffect(() => {
+    console.log('useEffect running', { isGameRunning, isPaused });
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
