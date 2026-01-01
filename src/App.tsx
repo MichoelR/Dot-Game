@@ -255,7 +255,7 @@ const DotGuessingGame: React.FC = () => {
   const [isLevelUpDialogOpen, setIsLevelUpDialogOpen] =
     useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [driftSpeed, setDriftSpeed] = useState<number>(4.0);
+  const [driftSpeed, setDriftSpeed] = useState<number>(0);
 
   useEffect(() => {
     // Clear any existing interval
@@ -264,22 +264,21 @@ const DotGuessingGame: React.FC = () => {
       intervalRef.current = null;
     }
     // restart game
-    if (isGameRunning) {
+
       // Focus the input field when the game starts
       if (inputRef.current) {
         inputRef.current.focus();
       }
-    }
   }, [isGameRunning]);
 
   useEffect(() => {
     // timer
-    if (isGameRunning) {
+    let timer;
+    if (isGameRunning && !isPaused) {
       if (timeLeft > 0 && !buttonsDisabled) {
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           setTimeLeft(timeLeft - 1); // Decrement time left every second
         }, 1000);
-        return () => clearTimeout(timer);
       } else if (timeLeft === 0) {
         // If the timer reaches zero
         setMessage(""); // Clear any messages
@@ -293,12 +292,10 @@ const DotGuessingGame: React.FC = () => {
         }, 250); // Delay before the next round starts
       }
     }
-  }, [
-    timeLeft,
-    isGameRunning,
-    buttonsDisabled,
-    isPaused,
-  ]);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [timeLeft, isGameRunning, isPaused, buttonsDisabled]);
 
   useEffect(() => {
     // Update dot shapes immediately when `shapeType` changes
@@ -334,101 +331,69 @@ const DotGuessingGame: React.FC = () => {
     );
   }, [colorType]);
 
-
-
-  useEffect(() => {
-    if (isGameRunning && !isPaused) {
-      if (timeLeft > 0 && !buttonsDisabled) {
-        const timer = setTimeout(() => {
-          setTimeLeft(timeLeft - 1);
-        }, 1000);
-        return () => clearTimeout(timer);
-      } else if (timeLeft === 0) {
-        setMessage("");
-        setIsGameRunning(false);
-        setIsPaused(false);
-        setTimeout(() => {
-          startOneGame();
-        }, 250);
-      }
-    }
-    if (isGameRunning) {
-      intervalRef.current = setInterval(() => {
-        setDots((prevDots) => {
-            return prevDots.map((dot) => {
-            if (!dot.vxSign || !dot.vySign || !dot.r) {
-              return dot;
+    useEffect(() => {
+          let timer;
+          if (isGameRunning && !isPaused) {
+            if (timeLeft > 0 && !buttonsDisabled) {
+              timer = setTimeout(() => {
+                setTimeLeft(timeLeft - 1);
+              }, 1000);
+            } else if (timeLeft === 0) {
+              setMessage("");
+              setIsGameRunning(false);
+              setIsPaused(false);
+              setTimeout(() => {
+                startOneGame();
+              }, 250);
             }
-
-            let vxSign = dot.vxSign;
-            let vySign = dot.vySign;
-
-            let deltaX = vxSign * driftSpeed * dot.r;
-            let deltaY = vySign * driftSpeed * dot.r;
-
-            let newTop = parseFloat(dot.top || "0") + deltaY;
-            let newLeft = parseFloat(dot.left || "0") + deltaX;
-
-            //         // Bounce off edges (top 0-90%, left 0-95% to avoid border)
-            if (newTop <= 0 || newTop >= 90) {
-              vySign = -vySign;
-              newTop = Math.max(0, Math.min(90, newTop));
+            intervalRef.current = setInterval(() => {
+              setDots((prevDots) => {
+                return prevDots.map((dot) => {
+                  if (!dot.vxSign || !dot.vySign || !dot.r) {
+                    return dot;
+                  }
+                  let vxSign = dot.vxSign;
+                  let vySign = dot.vySign;
+                  let deltaX = vxSign * driftSpeed * dot.r;
+                  let deltaY = vySign * driftSpeed * dot.r;
+                  let newTop = parseFloat(dot.top || "0") + deltaY;
+                  let newLeft = parseFloat(dot.left || "0") + deltaX;
+                  if (newTop <= 0 || newTop >= 90) {
+                    vySign = -vySign;
+                    newTop = Math.max(0, Math.min(90, newTop));
+                  }
+                  if (newLeft <= 0 || newLeft >= 94) {
+                    vxSign = -vxSign;
+                    newLeft = Math.max(0, Math.min(94, newLeft));
+                  }
+                  return {
+                    color: dot.color,
+                    shape: dot.shape,
+                    top: newTop + "%",
+                    left: newLeft + "%",
+                    vxSign,
+                    vySign,
+                    r: dot.r
+                  };
+                });
+              });
+            }, 50);
+          } else {
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
             }
-            if (newLeft <= 0 || newLeft >= 94) {
-              vxSign = -vxSign;
-              newLeft = Math.max(0, Math.min(94, newLeft));
+          }
+          return () => {
+            if (timer) clearTimeout(timer);
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
             }
+          };
+        }, [timeLeft, isGameRunning, isPaused, buttonsDisabled, driftSpeed]);
 
-            return {
-              x: dot.x,
-              y: dot.y,
-              size: dot.size,
-              color: dot.color,
-              shape: dot.shape,
-              top: newTop + "%",
-              left: newLeft + "%",
-              vxSign,
-              vySign,
-              r: dot.r
-            }
-          });
-        });
-  //     // Check for collisions between dots
-  // if (bouncingEnabled) {
-  //   for (let i = 0; i < updatedDots.length; i++) {
-  //     for (let j = i + 1; j < updatedDots.length; j++) {
-  //       const dot1 = updatedDots[i];
-  //       const dot2 = updatedDots[j];
-  //       if (!dot1 || !dot2) continue;
 
-  //       const cx1 = parseFloat(dot1.left || "0") + 20;
-  //       const cy1 = parseFloat(dot1.top || "0") + 20;
-  //       const cx2 = parseFloat(dot2.left || "0") + 20;
-  //       const cy2 = parseFloat(dot2.top || "0") + 20;
-
-  //       if (Math.abs(cx1 - cx2) < 40 && Math.abs(cy1 - cy2) < 40) {
-  //         // Collision: reverse directions
-  //         const tempVx = dot1.vxSign;
-  //         const tempVy = dot1.vySign;
-  //         dot1.vxSign = dot2.vxSign;
-  //         dot1.vySign = dot2.vySign;
-  //         dot2.vxSign = tempVx;
-  //         dot2.vySign = tempVy;
-  //       }
-  //     }
-  //   }
-  // }
-        }, 50); // Update every 50ms for smooth animation
-
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      };
-    }
-
-  }, [timeLeft, isGameRunning, buttonsDisabled, isPaused]);
 
   const resetMinMax = (level) => {
     // just setting initial values after moving a level
@@ -858,7 +823,7 @@ const DotGuessingGame: React.FC = () => {
           <Typography
             sx={{ fontSize: "30px", fontWeight: "bold", marginBottom: "10px" }}
           >
-            Drifting Dots Speed: {driftSpeed.toFixed(2)}
+            Drifting Dots Speed: {driftSpeed === 0 ? "Off" : driftSpeed.toFixed(2)}
           </Typography>
           <Slider
             value={driftSpeed}

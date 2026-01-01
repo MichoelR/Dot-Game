@@ -1,0 +1,1 @@
+"Dialog Summary: Fixed drifting function in dot counting game. Initial drift speed set to 0, displayed as 'Off'. Slider controls speed, dots drift during active rounds." 
