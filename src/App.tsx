@@ -427,12 +427,7 @@ const DotGuessingGame: React.FC = () => {
         }
       };
     }
-  } else {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }
+
   }, [timeLeft, isGameRunning, buttonsDisabled, isPaused]);
 
   const resetMinMax = (level) => {
